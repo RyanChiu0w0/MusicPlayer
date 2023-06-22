@@ -1,0 +1,161 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    
+    <style>
+
+        #ControlPanel {
+            border: 3px solid;
+            width: 700px;
+            height: 400px;
+            margin: auto;
+            text-align: center;
+        }
+
+        #ControlPanel>span{
+            border:2px solid;
+            padding:3px;
+            box-shadow:2px 2px 3px black;
+            cursor:pointer;
+            font-family:Webdings;
+            font-size:2rem;
+        }
+
+    </style>
+
+</head>
+<body>
+   
+    <div id="ControlPanel">
+        <select id="Select1" onchange="changeMusic(event)">
+            <option value="music/elysees.mp3">Champs-Elyees</option>
+            <option value="music/airball.mp3">告白氣球</option>
+
+        </select>
+
+        <hr />
+        <span onclick="Play()" id="btnPlay" title="播放紐">4</span>
+        <span onclick="Stop()"><</span>
+        <!--<span onclick="Pause()">;</span>-->
+        <span onclick="changTime(-5)">7</span>
+        <span onclick="changTime(+5)">8</span>
+
+        <span onclick="changeSong(-1)">9</span>
+        <span onclick="changeSong(1)">:</span>
+
+        <hr />
+        <input id="volValue" type="range" max="100" min="0" value="100" onchange="setVolume()" /> <!--oninput隨時改變-->
+        <input id="Button1" type="button" value="-" onclick="changeVolume(-0.05)" />
+        <input id="Button2" type="button" value="+" onclick="changeVolume(0.05)" />
+        <hr />
+        <div id="info">
+            <marquee>請按撥放紐</marquee>
+            <div>00:00 / 00:00</div>
+        </div>
+    </div>
+
+    <audio id="music" controls="controls">
+        <source src="music/elysees.mp3" type="audio/mpeg" title="Champs-Elyees" />
+    </audio>
+
+    <script>
+
+        var audio = document.getElementById("music"); /*設id*/
+        var btnPlay = document.getElementById("btnPlay");
+        var volValue = document.getElementById("volValue");
+        var info = document.getElementById("info");
+
+        console.log(info.children[0].title);
+
+        function() {
+
+        }
+
+        //歌曲切換
+        var musicObj, musicIndex = 0;
+        function changeMusic(evt) {
+
+            //console.log(evt.target.options[evt.target.selectedIndex].value);
+            musicObj = evt.target.options;
+            musicIndex = evt.target.selectedIndex;
+
+            audio.children[0].src = musicObj[musicIndex].value;
+            audio.children[0].title = musicObj[musicIndex].innerText;
+            audio.load();
+
+            if (btnPlay.innerText == ";")
+                Play();
+        }
+
+        //時間格式轉換
+        var min = 0, sec = 0, min2 = 0, sec2 = 0;
+        function getTimeFormat(timeSec) { //取得當下時間(抓引數轉為參數)
+            min = parseInt(timeSec / 60);
+            sec = parseInt(timeSec % 60);
+            min = min < 10 ? "0" + min : min; //3元運算子
+            sec = sec < 10 ? "0" + sec : sec;
+
+            return min + ":" + sec;
+        }
+
+        //取得歌曲撥放時間
+        function getDuration() {
+            
+            info.children[1].innerText = getTimeFormat(audio.currentTime) + " / " + getTimeFormat(audio.duration); // 當下時間/固定時間
+
+            if (audio.currentTime < audio.duration)
+                setTimeout(getDuration, 1000); /*時間到後想要執行的函式內容(毫秒)*/
+        }
+
+        //撥放&暫停
+        function Play() {
+            if (audio.paused) {
+                audio.play();
+                btnPlay.innerText = ";";
+                info.children[0].innerText = "現在播放:" + audio.children[0].title;
+                getDuration();
+            }
+            else {
+                audio.pause();
+                btnPlay.innerText = "4";
+                info.children[0].innerText = "音樂暫停中";
+            }
+
+        }
+
+        //function Pause() {
+        //    audio.pause();
+        //}
+
+        //停止撥放
+        function Stop() {
+            audio.pause();
+            audio.currentTime = 0; //指定至第0秒
+            btnPlay.innerText = "4";
+            info.children[0].innerText = "已停止撥放";
+        }
+
+        //快轉&倒轉
+        function changTime(t) {
+            audio.currentTime += t;
+        }
+
+        //音量微調
+        function changeVolume(v) {
+            //audio.volume += v;
+            volValue.value = parseInt(volValue.value) + v;
+            setVolume();
+        }
+
+        //音量調整
+        function setVolume() {
+            audio.volume = volValue.value / 100;
+
+        }
+
+    </script>
+
+</body>
+</html>
